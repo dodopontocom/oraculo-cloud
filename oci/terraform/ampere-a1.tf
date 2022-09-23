@@ -20,7 +20,7 @@ resource "oci_core_instance" "ampere-a1-instance" {
 
   source_details {
     source_type = "image"
-    source_id   = "ocid1.image.oc1.sa-vinhedo-1.aaaaaaaamkqk6g3o2acbadefwgyysa3fyb6aasrmwipvjcnngkygmqvrnbiq"
+    source_id   = data.oci_core_image.a1_image.image_id
     # Apply this to set the size of the boot volume that is created for this instance.
     # Otherwise, the default boot volume size of the image is used.
     # This should only be specified when source_type is set to "image".

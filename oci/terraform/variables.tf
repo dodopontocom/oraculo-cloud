@@ -4,3 +4,6 @@ variable "user_ocid" {}
 #variable "private_key_path" {}
 variable "region" {}
 variable "vcn_name" {}
+variable "ubuntu_a1_image_version" {
+    default = "20.04"
+}
