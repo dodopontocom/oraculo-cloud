@@ -1,12 +1,13 @@
 resource "oci_core_instance" "ampere-a1-instance" {
+  count               = 2
   availability_domain = data.oci_identity_availability_domain.ad.name
   compartment_id      = var.tenancy_ocid
-  display_name        = "AmpereA1-test"
+  display_name        = "AmpereA1-${count.index}"
   shape               = "VM.Standard.A1.Flex"
 
   shape_config {
-    ocpus         = 4
-    memory_in_gbs = 24
+    ocpus         = 2
+    memory_in_gbs = 12
   }
 
   create_vnic_details {
@@ -14,7 +15,7 @@ resource "oci_core_instance" "ampere-a1-instance" {
     display_name              = oci_core_vcn.my_vnc.display_name
     assign_public_ip          = true
     assign_private_dns_record = true
-    hostname_label            = "exampleinstance"
+    hostname_label            = "ampere-node-${count.index}"
   }
 
   source_details {

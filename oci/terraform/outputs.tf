@@ -15,7 +15,7 @@ output "subnet_state" {
 }
 
 output "instance_pub_ip" {
-  value = oci_core_instance.ampere-a1-instance.public_ip
+  value = oci_core_instance.ampere-a1-instance.*.public_ip
 }
 
 output "oci_identity_availability_domain" {
