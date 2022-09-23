@@ -1,19 +1,23 @@
 output "vnc_id" {
-    description = "Some information about created VCN"
-    value = oci_core_vcn.internal.id
+  value = oci_core_vcn.my_vnc.id
 }
 
 output "vnc_state" {
-    description = "Some information about created VCN"
-    value = oci_core_vcn.internal.state
+  value = oci_core_vcn.my_vnc.state
 }
 
 output "subnet_info" {
-    description = "Some information about created VCN"
-    value = oci_core_subnet.dev.id
+  value = oci_core_subnet.dev_subnet.id
 }
 
 output "subnet_state" {
-    description = "Some information about created VCN"
-    value = oci_core_subnet.dev.state
+  value = oci_core_subnet.dev_subnet.state
+}
+
+output "instance_pub_ip" {
+  value = oci_core_instance.ampere-a1-instance.public_ip
+}
+
+output "oci_identity_availability_domain" {
+  value = data.oci_identity_availability_domain.ad.name
 }
