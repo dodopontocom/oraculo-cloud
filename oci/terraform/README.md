@@ -1,4 +1,4 @@
-###  
-##  
-#  
-https://github.com/oracle/terraform-provider-oci
+### terraform studies 
+## for OCI
+# ref:
+`https://github.com/oracle/terraform-provider-oci`  
