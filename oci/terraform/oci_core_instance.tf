@@ -26,6 +26,9 @@ resource "oci_core_instance" "ampere-a1-instance" {
     # This should only be specified when source_type is set to "image".
     #boot_volume_size_in_gbs = "60"
   }
+  metadata = {
+    ssh_authorized_keys = var.ssh_public_key
+  }
 
   # Apply the following flag only if you wish to preserve the attached boot volume upon destroying this instance
   # Setting this and destroying the instance will result in a boot volume that should be managed outside of this config.
