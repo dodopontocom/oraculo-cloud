@@ -35,3 +35,11 @@ output "a1_image_id" {
     for opsv, details in data.oci_core_images.supported_a1_instances_shape_images.images:
     opsv => details.id if details.operating_system_version == "20.04" })[0]
 }
+
+output "namespace_bucket" {
+    value = data.oci_objectstorage_namespace.namespace
+}
+
+# output "preauth_url" {
+#   value = oci_objectstorage_preauthrequest.preauthenticated_request
+# }

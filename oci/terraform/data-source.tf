@@ -15,3 +15,16 @@ data "oci_core_image" "a1_image" {
     for opsv, details in data.oci_core_images.supported_a1_instances_shape_images.images:
     opsv => details.id if details.operating_system_version == var.ubuntu_a1_image_version })[0]
 }
+
+data "oci_objectstorage_namespace" "namespace" {
+    compartment_id = var.tenancy_ocid
+}
+
+# data "oci_objectstorage_preauthrequests" "test_preauthenticated_requests" {
+#     #Required
+#     bucket = "tf"
+#     namespace = data.oci_objectstorage_namespace.namespace.namespace
+
+#     #Optional
+#     #object_name_prefix = var.preauthenticated_request_object_name_prefix
+# }
