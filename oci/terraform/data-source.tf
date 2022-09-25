@@ -11,9 +11,9 @@ data "oci_core_images" "supported_a1_instances_shape_images" {
 }
 
 data "oci_core_image" "a1_image" {
-    image_id = values({
-    for opsv, details in data.oci_core_images.supported_a1_instances_shape_images.images:
-    opsv => details.id if details.operating_system_version == var.ubuntu_a1_image_version })[0]
+  image_id = values({
+  for opsv, details in data.oci_core_images.supported_a1_instances_shape_images.images:
+  opsv => details.id if details.operating_system_version == var.ubuntu_a1_image_version })[0]
 }
 
 data "oci_objectstorage_namespace" "namespace" {

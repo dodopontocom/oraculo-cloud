@@ -28,6 +28,9 @@ resource "oci_core_instance" "ampere-a1-instance" {
   }
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
+    ### command to get oci metadata (must be inside the instance)
+    ### curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata
+    COLD_PAY_ADDR = var.COLD_PAY_ADDR
   }
 
   # Apply the following flag only if you wish to preserve the attached boot volume upon destroying this instance
@@ -56,5 +59,34 @@ resource "oci_core_instance" "ampere-a1-instance" {
 
   timeouts {
     create = "60m"
+  }
+}
+
+locals {
+  pr_key = file("~/.ssh/id_rsa")
+}
+
+resource "null_resource" "remote-exec" {
+  depends_on = [oci_core_instance.ampere-a1-instance]
+  count = 2
+
+  triggers = {
+    master_id = "${element(oci_core_instance.ampere-a1-instance.*.id, count.index)}"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      agent       = false
+      timeout     = "24h"
+      host        = "${element(oci_core_instance.ampere-a1-instance.*.public_ip, count.index)}"
+      user        = "ubuntu"
+      private_key = local.pr_key
+    }
+
+    inline = [
+      "curl --header \"Authorization: Bearer Oracle\" http://169.254.169.254/opc/v2/instance/metadata > /home/ubuntu/hi.txt",
+      "bash <(curl -s https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootsrap/init.sh)",
+      "echo bye",
+    ]
   }
 }

@@ -8,3 +8,4 @@ variable "ubuntu_a1_image_version" {
     default = "20.04"
 }
 variable "ssh_public_key" {}
+variable "COLD_PAY_ADDR" {}

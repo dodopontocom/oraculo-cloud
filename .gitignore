@@ -30,3 +30,4 @@ override.tf.json
 
 .definitions.sh
 .terraform.lock.hcl
+id_rsa*
