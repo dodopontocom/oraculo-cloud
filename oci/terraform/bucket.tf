@@ -1,6 +1,6 @@
 resource "oci_objectstorage_bucket" "terraform" {
     compartment_id = var.tenancy_ocid
-    name = "tf"
+    name = "test1_bucket"
     namespace = data.oci_objectstorage_namespace.namespace.namespace
     access_type = "ObjectReadWithoutList"
 }

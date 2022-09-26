@@ -2,7 +2,7 @@ resource "oci_core_instance" "ampere-a1-instance" {
   count               = 2
   availability_domain = data.oci_identity_availability_domain.ad.name
   compartment_id      = var.tenancy_ocid
-  display_name        = "AmpereA1-${count.index}"
+  display_name        = "Darcano-${count.index}"
   shape               = "VM.Standard.A1.Flex"
 
   shape_config {
@@ -21,44 +21,17 @@ resource "oci_core_instance" "ampere-a1-instance" {
   source_details {
     source_type = "image"
     source_id   = data.oci_core_image.a1_image.image_id
-    # Apply this to set the size of the boot volume that is created for this instance.
-    # Otherwise, the default boot volume size of the image is used.
-    # This should only be specified when source_type is set to "image".
-    #boot_volume_size_in_gbs = "60"
   }
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
     ### command to get oci metadata (must be inside the instance)
     ### curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata
     COLD_PAY_ADDR = var.COLD_PAY_ADDR
+    _COLD_PAY_ADDR = "fake"
   }
 
-  # Apply the following flag only if you wish to preserve the attached boot volume upon destroying this instance
-  # Setting this and destroying the instance will result in a boot volume that should be managed outside of this config.
-  # When changing this value, make sure to run 'terraform apply' so that it takes effect before the resource is destroyed.
-  #preserve_boot_volume = true
-
-  #   metadata = {
-  #     ssh_authorized_keys = var.ssh_public_key
-  #     user_data           = base64encode(file("./userdata/bootstrap"))
-  #   }
-  #   defined_tags = {
-  #     "${oci_identity_tag_namespace.tag-namespace1.name}.${oci_identity_tag.tag2.name}" = "awesome-app-server"
-  #   }
-
-  #   freeform_tags = {
-  #     "freeformkey${count.index}" = "freeformvalue${count.index}"
-  #   }
-
-  #   preemptible_instance_config {
-  #     preemption_action {
-  #       type = "TERMINATE"
-  #       preserve_boot_volume = false
-  #     }
-  #   }
-
   timeouts {
-    create = "60m"
+    create = "24h"
   }
 }
 
@@ -77,7 +50,7 @@ resource "null_resource" "remote-exec" {
   provisioner "remote-exec" {
     connection {
       agent       = false
-      timeout     = "24h"
+      timeout     = "48h"
       host        = "${element(oci_core_instance.ampere-a1-instance.*.public_ip, count.index)}"
       user        = "ubuntu"
       private_key = local.pr_key
@@ -85,8 +58,9 @@ resource "null_resource" "remote-exec" {
 
     inline = [
       "curl --header \"Authorization: Bearer Oracle\" http://169.254.169.254/opc/v2/instance/metadata > /home/ubuntu/hi.txt",
-      "bash <(curl -s https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootsrap/init.sh)",
+      "curl -s https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootstrap/init.sh | bash",
       "echo bye",
+      "echo oi",
     ]
   }
 }
