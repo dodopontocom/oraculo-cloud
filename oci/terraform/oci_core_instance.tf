@@ -27,7 +27,8 @@ resource "oci_core_instance" "ampere-a1-instance" {
     ### command to get oci metadata (must be inside the instance)
     ### curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata
     COLD_PAY_ADDR = var.COLD_PAY_ADDR
-    _COLD_PAY_ADDR = "fake"
+    DARLENE1_TOKEN = var.DARLENE1_TOKEN
+    TELEGRAM_ID = var.TELEGRAM_ID
   }
 
   timeouts {
