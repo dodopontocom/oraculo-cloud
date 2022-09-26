@@ -9,3 +9,5 @@ variable "ubuntu_a1_image_version" {
 }
 variable "ssh_public_key" {}
 variable "COLD_PAY_ADDR" {}
+variable "DARLENE1_TOKEN" {}
+variable "TELEGRAM_ID" {}
