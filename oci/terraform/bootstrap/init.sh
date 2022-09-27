@@ -11,11 +11,14 @@ sudo apt-get update -y
 sudo apt-get install -y git jq bc make automake rsync htop \
     build-essential pkg-config libffi-dev libgmp-dev \
     libssl-dev libtinfo-dev libsystemd-dev zlib1g-dev \
-    make g++ wget libncursesw5 libtool autoconf libncurses-dev libtinfo5 \
-    llvm libnuma-dev
-
+    make g++ wget libncursesw5 libtool autoconf libncurses-dev libtinfo5
+sudo apt-get update -y
 if [[ "$?" -ne "0" ]]; then
-  curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt upgrade failed"
+  curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt update failed"
+fi
+sudo apt-get install -y llvm libnuma-dev
+if [[ "$?" -ne "0" ]]; then
+  curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt numa and llvm failed"
 fi
 
 ### 001 setup
