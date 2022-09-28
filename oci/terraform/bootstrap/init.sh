@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 export COLD_PAY_ADDR=$(curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata/COLD_PAY_ADDR)
 
 DARLENE1_TOKEN=$(curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata/DARLENE1_TOKEN)
