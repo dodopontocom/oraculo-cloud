@@ -25,16 +25,6 @@ fi
 
 mkdir $HOME/git
 
-cd $HOME/git
-git clone https://github.com/stedolan/jq.git
-cd jq/
-git submodule update --init
-autoreconf -fi
-./configure --with-oniguruma=builtin
-make LDFLAGS=-all-static
-make check
-sudo make install
-
 ### 001 setup
 
 export BOOTSTRAP_HASKELL_NONINTERACTIVE=true
