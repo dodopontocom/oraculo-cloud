@@ -23,6 +23,7 @@ if [[ "$?" -ne "0" ]]; then
   curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt numa and llvm failed"
 fi
 
+mkdir $HOME/git
 cd $HOME/git
 git clone https://github.com/stedolan/jq.git
 cd jq/
@@ -42,7 +43,6 @@ GHC_VERSION="8.10.7"
 CABAL_VERSION="3.6.2.0"
 NODE_HOME="${HOME}/cardano-node"
 
-mkdir ~/git
 cd ~/git
 git clone https://github.com/input-output-hk/libsodium
 cd libsodium
