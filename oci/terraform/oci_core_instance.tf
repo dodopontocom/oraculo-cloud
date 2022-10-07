@@ -61,6 +61,7 @@ resource "null_resource" "remote-exec" {
       "curl --header \"Authorization: Bearer Oracle\" http://169.254.169.254/opc/v2/instance/metadata > /home/ubuntu/hi.txt",
       "wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootstrap/init.sh",
       "chmod +x ./init.sh",
+      "sleep 30",
       "nohup ./init.sh &",
       "sleep 5",
     ]
