@@ -24,6 +24,7 @@ if [[ "$?" -ne "0" ]]; then
 fi
 
 mkdir $HOME/git
+
 cd $HOME/git
 git clone https://github.com/stedolan/jq.git
 cd jq/
@@ -57,14 +58,19 @@ sudo ln -s /usr/local/lib/libsodium.so.23.3.0 /usr/lib/libsodium.so.23
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - install libsodium done"
 
 #https://github.com/input-output-hk/cardano-node/blob/master/doc/getting-started/install.md/
-cd $HOME/git
-git clone https://github.com/bitcoin-core/secp256k1
-cd secp256k1
-git checkout ac83be33
-./autogen.sh
-./configure --enable-module-schnorrsig --enable-experimental
-make
-sudo make install
+#cd $HOME/git
+#git clone https://github.com/bitcoin-core/secp256k1
+#cd secp256k1
+#git checkout ac83be33
+#./autogen.sh
+#./configure --enable-module-schnorrsig --enable-experimental
+#make
+#sudo make install
+
+#https://gist.github.com/reqlez/a9291d25c477a5aa6f411db78a95fa31
+curl -sS -o prereqs.sh https://raw.githubusercontent.com/cardano-community/guild-operators/alpha/scripts/cnode-helper-scripts/prereqs.sh
+chmod +x prereqs.sh
+./prereqs.sh -b alpha
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - install secp done"
 
