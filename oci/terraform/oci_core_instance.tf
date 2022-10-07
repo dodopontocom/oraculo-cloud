@@ -1,13 +1,13 @@
 resource "oci_core_instance" "ampere-a1-instance" {
-  count               = 1
+  count               = 2
   availability_domain = data.oci_identity_availability_domain.ad.name
   compartment_id      = var.tenancy_ocid
   display_name        = "preprod-cardano-node-${count.index}"
   shape               = "VM.Standard.A1.Flex"
 
   shape_config {
-    ocpus         = 4
-    memory_in_gbs = 24
+    ocpus         = 2
+    memory_in_gbs = 12
   }
 
   create_vnic_details {
@@ -42,7 +42,7 @@ locals {
 
 resource "null_resource" "remote-exec" {
   depends_on = [oci_core_instance.ampere-a1-instance]
-  count = 1
+  count = 2
 
   triggers = {
     master_id = "${element(oci_core_instance.ampere-a1-instance.*.id, count.index)}"
@@ -59,8 +59,10 @@ resource "null_resource" "remote-exec" {
 
     inline = [
       "curl --header \"Authorization: Bearer Oracle\" http://169.254.169.254/opc/v2/instance/metadata > /home/ubuntu/hi.txt",
-      "curl -s https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootstrap/init.sh",
+      "wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/terraform/bootstrap/init.sh",
+      "chmod +x ./init.sh",
       "nohup ./init.sh &",
+      "sleep 5",
     ]
   }
 }
