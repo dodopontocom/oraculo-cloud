@@ -46,6 +46,18 @@ sudo ln -s /usr/local/lib/libsodium.so.23.3.0 /usr/lib/libsodium.so.23
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - install libsodium done"
 
+#https://github.com/input-output-hk/cardano-node/blob/master/doc/getting-started/install.md/
+cd $HOME/git
+git clone https://github.com/bitcoin-core/secp256k1
+cd secp256k1
+git checkout ac83be33
+./autogen.sh
+./configure --enable-module-schnorrsig --enable-experimental
+make
+sudo make install
+
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - install secp done"
+
 cd $HOME
 curl --proto '=https' --tlsv1.2 -sSf -o ghcup.sh https://get-ghcup.haskell.org
 chmod +x ghcup.sh
@@ -71,16 +83,6 @@ NODE_CONFIG=preprod
 
 echo export NODE_CONFIG=preprod >> $HOME/.bashrc
 source $HOME/.bashrc
-
-#https://github.com/input-output-hk/cardano-node/blob/master/doc/getting-started/install.md/
-cd $HOME/git
-git clone https://github.com/bitcoin-core/secp256k1
-cd secp256k1
-git checkout ac83be33
-./autogen.sh
-./configure --enable-module-schnorrsig --enable-experimental
-make
-sudo make install
 
 cabal update
 cabal --version
