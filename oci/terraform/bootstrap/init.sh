@@ -10,7 +10,7 @@ curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d cha
 
 sudo apt-get upgrade
 sudo apt-get update
-sudo apt-get install -y git jq bc make automake rsync htop \
+sudo apt-get install -y bison net-tools unzip flex python3-pip tcptraceroute git jq bc make automake rsync htop \
     build-essential pkg-config libffi-dev libgmp-dev \
     libssl-dev libtinfo-dev libsystemd-dev zlib1g-dev \
     make g++ wget libncursesw5 libtool autoconf libncurses-dev libtinfo5
@@ -18,10 +18,20 @@ sudo apt-get update -y
 if [[ "$?" -ne "0" ]]; then
   curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt update failed"
 fi
-sudo apt-get install -y llvm libnuma-dev
+sudo apt-get install -y numactl llvm-12 libnuma-dev
 if [[ "$?" -ne "0" ]]; then
   curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - apt numa and llvm failed"
 fi
+
+cd $HOME/git
+git clone https://github.com/stedolan/jq.git
+cd jq/
+git submodule update --init
+autoreconf -fi
+./configure --with-oniguruma=builtin
+make LDFLAGS=-all-static
+make check
+sudo make install
 
 ### 001 setup
 
@@ -64,6 +74,7 @@ chmod +x ghcup.sh
 ./ghcup.sh
 
 source $HOME/.ghcup/env
+source $HOME/.bashrc
 
 ghcup upgrade
 ghcup install cabal ${CABAL_VERSION}
