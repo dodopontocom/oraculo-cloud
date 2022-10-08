@@ -11,8 +11,20 @@ CABAL_VERSION="3.6.2.0"
 NODE_HOME="${HOME}/cardano-node"
 CARDANO_NODE_SOCKET_PATH="${NODE_HOME}/db/socket"
 NODE_CONFIG="preprod"
-
 mkdir ${HOME}/git
+mkdir ${NODE_HOME}
+
+cd ${NODE_HOME}
+wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/config.json
+wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
+wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/byron-genesis.json
+wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/shelley-genesis.json
+wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-genesis.json
+
+cd -
+
+nwmagic="$(cat ${NODE_HOME}/shelley-genesis.json | jq -r .networkMagic)"
+nwmagic_arg="testnet-magic ${nwmagic}"
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Hello from ${HOSTNAME}"
 
@@ -99,15 +111,6 @@ sleep 10
 sudo cp $(find $HOME/git/cardano-node/dist-newstyle/build -type f -name "cardano-cli") /usr/local/bin/cardano-cli
 sudo cp $(find $HOME/git/cardano-node/dist-newstyle/build -type f -name "cardano-node") /usr/local/bin/cardano-node
 
-mkdir ${NODE_HOME}
-cd ${NODE_HOME}
-
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/config.json
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/byron-genesis.json
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/shelley-genesis.json
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-genesis.json
-
 #leave TraceMempool as it is in BP and false in relay
 sed -i config.json -e "s/TraceBlockFetchDecisions\": false/TraceBlockFetchDecisions\": true/g"
 if [[ $(echo ${HOSTNAME} | grep -E "\-1") ]]; then
@@ -115,6 +118,7 @@ if [[ $(echo ${HOSTNAME} | grep -E "\-1") ]]; then
 fi
 
 echo export CARDANO_NODE_SOCKET_PATH="${CARDANO_NODE_SOCKET_PATH}" >> ${HOME}/.bashrc
+export CARDANO_NODE_SOCKET_PATH="${CARDANO_NODE_SOCKET_PATH}"
 source ${HOME}/.bashrc
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - Almost there"
@@ -187,11 +191,17 @@ fi
 ##############################################################################
 message=$(uptime -p)
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
-while [[ $(CARDANO_NODE_SOCKET_PATH=/home/ubuntu/cardano-node/db/socket cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-) -lt 100 ]]; do
+while [[ $(cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-) -lt 100 ]]; do
     message="${HOSTNAME} - sync progress: "
-    message+=$(CARDANO_NODE_SOCKET_PATH=/home/ubuntu/cardano-node/db/socket cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-)
+    message+=$(cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-)
     curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
     sleep 1200
 done
 message=$(uptime -p)
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
+
+### 003 - part III
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts"
+cardano-cli query protocol-parameters --${nwmagic_arg} --out-file ${NODE_HOME}/protocol.json
+
+
