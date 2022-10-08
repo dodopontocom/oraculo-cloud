@@ -23,9 +23,6 @@ wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-ge
 
 cd -
 
-nwmagic="$(cat ${NODE_HOME}/shelley-genesis.json | jq -r .networkMagic)"
-nwmagic_arg="testnet-magic ${nwmagic}"
-
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Hello from ${HOSTNAME}"
 
 sudo apt-get upgrade
@@ -38,6 +35,9 @@ sudo apt-get install -y bison net-tools unzip \
   libncurses-dev libtinfo5 numactl llvm-12 libnuma-dev
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="apt done"
+
+nwmagic="$(cat ${NODE_HOME}/shelley-genesis.json | jq -r .networkMagic)"
+nwmagic_arg="testnet-magic ${nwmagic}"
 
 ### 001 setup
 cd ${HOME}/git
