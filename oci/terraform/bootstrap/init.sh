@@ -79,9 +79,12 @@ echo PATH="$HOME/.local/bin:$PATH" >> ${HOME}/.bashrc
 LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 
 echo export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" >> ${HOME}/.bashrc
-echo export NODE_HOME=${NODE_HOME} >> $HOME/.bashrc
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+echo export NODE_HOME=${NODE_HOME} >> ${HOME}/.bashrc
+export NODE_HOME=${NODE_HOME}
 
 echo export NODE_CONFIG=${NODE_CONFIG} >> ${HOME}/.bashrc
+export NODE_CONFIG=${NODE_CONFIG}
 source ${HOME}/.bashrc
 
 cabal update
@@ -99,7 +102,7 @@ git checkout tags/${CARDANO_NODE_TAG}
 cabal configure -O0 -w ghc-${GHC_VERSION}
 
 echo -e "package cardano-crypto-praos\n flags: -external-libsodium-vrf" > cabal.project.local
-sed -i $HOME/.cabal/config -e "s/overwrite-policy:/overwrite-policy: always/g"
+sed -i ${HOME}/.cabal/config -e "s/overwrite-policy:/overwrite-policy: always/g"
 
 cabal build cardano-node
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - cardano-node done"
@@ -111,10 +114,12 @@ sleep 10
 sudo cp $(find $HOME/git/cardano-node/dist-newstyle/build -type f -name "cardano-cli") /usr/local/bin/cardano-cli
 sudo cp $(find $HOME/git/cardano-node/dist-newstyle/build -type f -name "cardano-node") /usr/local/bin/cardano-node
 
+cd ${HOME}
+
 #leave TraceMempool as it is in BP and false in relay
-sed -i config.json -e "s/TraceBlockFetchDecisions\": false/TraceBlockFetchDecisions\": true/g"
+sed -i ${NODE_HOME}/config.json -e "s/TraceBlockFetchDecisions\": false/TraceBlockFetchDecisions\": true/g"
 if [[ $(echo ${HOSTNAME} | grep -E "\-1") ]]; then
-  sed -i config.json -e "s/TraceMempool\": true/TraceMempool\": false/g"
+  sed -i ${NODE_HOME}/config.json -e "s/TraceMempool\": true/TraceMempool\": false/g"
 fi
 
 echo export CARDANO_NODE_SOCKET_PATH="${CARDANO_NODE_SOCKET_PATH}" >> ${HOME}/.bashrc
@@ -203,5 +208,3 @@ curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d cha
 ### 003 - part III
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts"
 cardano-cli query protocol-parameters --${nwmagic_arg} --out-file ${NODE_HOME}/protocol.json
-
-
