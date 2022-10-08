@@ -187,9 +187,9 @@ fi
 ##############################################################################
 message=$(uptime -p)
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
-while [[ $(cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-) -lt 100 ]]; do
+while [[ $(CARDANO_NODE_SOCKET_PATH=/home/ubuntu/cardano-node/db/socket cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-) -lt 100 ]]; do
     message="${HOSTNAME} - sync progress: "
-    message+=$(cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-)
+    message+=$(CARDANO_NODE_SOCKET_PATH=/home/ubuntu/cardano-node/db/socket cardano-cli query tip --testnet-magic 1 | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-)
     curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
     sleep 1200
 done
