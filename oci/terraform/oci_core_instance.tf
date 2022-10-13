@@ -21,6 +21,7 @@ resource "oci_core_instance" "ampere-a1-instance" {
   source_details {
     source_type = "image"
     source_id   = data.oci_core_image.a1_image.image_id
+    boot_volume_size_in_gbs = var.bvsize
   }
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
@@ -34,6 +35,8 @@ resource "oci_core_instance" "ampere-a1-instance" {
   timeouts {
     create = "24h"
   }
+
+  preserve_boot_volume = false
 }
 
 locals {
@@ -51,7 +54,7 @@ resource "null_resource" "remote-exec" {
   provisioner "remote-exec" {
     connection {
       agent       = false
-      timeout     = "48h"
+      timeout     = "24h"
       host        = "${element(oci_core_instance.ampere-a1-instance.*.public_ip, count.index)}"
       user        = "ubuntu"
       private_key = local.pr_key

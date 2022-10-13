@@ -11,3 +11,4 @@ variable "ssh_public_key" {}
 variable "COLD_PAY_ADDR" {}
 variable "DARLENE1_TOKEN" {}
 variable "TELEGRAM_ID" {}
+variable "bvsize" {}
