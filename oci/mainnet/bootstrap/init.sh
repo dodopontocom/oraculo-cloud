@@ -138,6 +138,7 @@ cd ${NODE_HOME}
 mkdir db
 wget -r -np -nH -R "index.html*" -e robots=off https://${NODE_CONFIG}.adamantium.online/db/
 cd -
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Snapshot done"
 
 ### 002 - Run
 #cardano-cli query tip --mainnet
@@ -180,6 +181,33 @@ SyslogIdentifier=cardano-node
 [Install]
 WantedBy	= multi-user.target
 EOF
+
+#install z-ram
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Getting z-ram"
+sudo apt install -y linux-modules-extra-$(uname -r) zram-config
+
+cat > ${NODE_HOME}/init-zram-swapping << EOF 
+#!/bin/sh
+
+modprobe zram
+
+# Calculate memory to use for zram (1/2 of ram)
+totalmem=`LC_ALL=C free | grep -e "^Mem:" | sed -e 's/^Mem: *//' -e 's/  *.*//'`
+echo lz4 > /sys/block/zram0/comp_algorithm
+mem=\$((totalmem / 2 * 1024 * 3))
+
+# initialize the devices
+echo \$mem > /sys/block/zram0/disksize
+mkswap /dev/zram0
+swapon -p 150 /dev/zram0
+EOF
+
+sudo cp ${NODE_HOME}/init-zram-swapping /usr/bin/init-zram-swapping
+sudo /usr/bin/init-zram-swapping
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Z-ram done"
+
+message=$(cat ${HOME}/external.ip)
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="External ip: ${message}"
 
 sudo mv ${NODE_HOME}/cardano-node.service /etc/systemd/system/cardano-node.service
 sudo chmod 644 /etc/systemd/system/cardano-node.service
