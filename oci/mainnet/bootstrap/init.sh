@@ -16,7 +16,8 @@ mkdir ${NODE_HOME}
 
 cd ${NODE_HOME}
 wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/config.json
-wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
+#wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
+wget -N https://book.world.dev.cardano.org/environments/mixed/topology.json
 wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/byron-genesis.json
 wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/shelley-genesis.json
 wget -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-genesis.json
@@ -121,6 +122,10 @@ sed -i ${NODE_HOME}/config.json -e "s/TraceBlockFetchDecisions\": false/TraceBlo
 if [[ $(echo ${HOSTNAME} | grep -E "\-1") ]]; then
   sed -i ${NODE_HOME}/config.json -e "s/TraceMempool\": true/TraceMempool\": false/g"
 fi
+
+#Enable P2P
+cat ${NODE_HOME}/config.json | jq -r '. |= . + {"EnableP2P": "true"}' > ${NODE_HOME}/_config.json 
+mv ${NODE_HOME}/_config.json ${NODE_HOME}/config.json
 
 echo export CARDANO_NODE_SOCKET_PATH="${CARDANO_NODE_SOCKET_PATH}" >> ${HOME}/.bashrc
 export CARDANO_NODE_SOCKET_PATH="${CARDANO_NODE_SOCKET_PATH}"
@@ -233,7 +238,7 @@ curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d cha
 while [[ $(cardano-cli query tip --mainnet | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-) -lt 100 ]]; do
     message="${HOSTNAME} - sync progress: "
     message+=$(cardano-cli query tip --mainnet | grep -i sync | awk '{ print $2 }' | cut -d'.' -f1 | cut -c 2-)
-    curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
+    curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${message}"
     sleep 1200
 done
 message=$(uptime -p)
