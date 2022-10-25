@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-step-b-testnet
+#step-b-testnet
 
 #Critical Key Security Reminder: The only stake pool keys and certs that are required to run a stake pool are
 #those required by the block producer. Namely, the following three files.

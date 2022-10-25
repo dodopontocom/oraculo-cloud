@@ -35,7 +35,8 @@ sudo apt-get install -y bison net-tools unzip \
   build-essential pkg-config libffi-dev libgmp-dev \
   libssl-dev libtinfo-dev libsystemd-dev zlib1g-dev \
   make g++ wget libncursesw5 libtool autoconf \
-  libncurses-dev libtinfo5 numactl llvm-12 libnuma-dev
+  libncurses-dev libtinfo5 numactl llvm-12 libnuma-dev \
+  libpam-google-authenticator fail2ban chrony
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="apt done"
 
@@ -189,7 +190,7 @@ EOF
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Getting z-ram"
 sudo apt install -y linux-modules-extra-$(uname -r) zram-config
 
-cat > ${NODE_HOME}/init-zram-swapping << EOF 
+cat > ${HOME}/init-zram-swapping << EOF 
 #!/bin/sh
 
 modprobe zram
@@ -205,12 +206,48 @@ mkswap /dev/zram0
 swapon -p 150 /dev/zram0
 EOF
 
-sudo cp ${NODE_HOME}/init-zram-swapping /usr/bin/init-zram-swapping
+sudo cp ${HOME}/init-zram-swapping /usr/bin/init-zram-swapping
 sudo /usr/bin/init-zram-swapping
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Z-ram done"
 
 message=$(cat ${HOME}/external.ip)
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="External ip: ${message}"
+
+#Crocny
+cat > ${HOME}/chrony.conf << EOF
+pool time.google.com       iburst minpoll 1 maxpoll 2 maxsources 3
+pool ntp.ubuntu.com        iburst minpoll 1 maxpoll 2 maxsources 3
+pool us.pool.ntp.org     iburst minpoll 1 maxpoll 2 maxsources 3
+
+# This directive specify the location of the file containing ID/key pairs for
+# NTP authentication.
+keyfile /etc/chrony/chrony.keys
+
+# This directive specify the file into which chronyd will store the rate
+# information.
+driftfile /var/lib/chrony/chrony.drift
+
+# Uncomment the following line to turn logging on.
+#log tracking measurements statistics
+
+# Log files location.
+logdir /var/log/chrony
+
+# Stop bad estimates upsetting machine clock.
+maxupdateskew 5.0
+
+# This directive enables kernel synchronisation (every 11 minutes) of the
+# real-time clock. Note that it can’t be used along with the 'rtcfile' directive.
+rtcsync
+
+# Step the system clock instead of slewing it if the adjustment is larger than
+# one second, but only in the first three clock updates.
+makestep 0.1 -1
+EOF
+
+sudo mv ${HOME}/chrony.conf /etc/chrony/chrony.conf
+sudo systemctl restart chronyd.service
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Crony done"
 
 sudo mv ${NODE_HOME}/cardano-node.service /etc/systemd/system/cardano-node.service
 sudo chmod 644 /etc/systemd/system/cardano-node.service
@@ -246,4 +283,17 @@ curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d cha
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts - continue in the server!!!"
 
 wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-b.sh
+wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-b.sh
 chmod +x ./step-b.sh
+chmod +x ./step-c.sh
+
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get autoremove
+sudo apt-get autoclean
+
+sudo apt-get install unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
+
+message=$(uptime -p)
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
