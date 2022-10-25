@@ -243,7 +243,7 @@ message=$(uptime -p)
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="${HOSTNAME} - ${message}"
 
 ### 003 - part III
-curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts - do it in the server!!!"
+curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts - continue in the server!!!"
 
 wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-b.sh
 chmod +x ./step-b.sh
