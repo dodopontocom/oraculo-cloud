@@ -2,8 +2,9 @@
 
 export BASEDIR="$(cd $(dirname ${BASH_SOURCE[0]}) >/dev/null 2>&1 && pwd)"
 
-oci session authenticate
-terraform destroy --auto-approve
+#oci session authenticate
+source ${BASEDIR}/../mainnet/.definitions.sh
+#terraform destroy --auto-approve
 terraform apply --auto-approve
 
 tfstate="${BASEDIR}/../mainnet/terraform.tfstate"

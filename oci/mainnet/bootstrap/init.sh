@@ -283,7 +283,7 @@ curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d cha
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="part III starts - continue in the server!!!"
 
 wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-b.sh
-wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-b.sh
+wget https://raw.githubusercontent.com/dodopontocom/oraculo-cloud/wip/oci/mainnet/bootstrap/step-c.sh
 chmod +x ./step-b.sh
 chmod +x ./step-c.sh
 
