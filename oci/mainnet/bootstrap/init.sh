@@ -21,10 +21,40 @@ mkdir ${NODE_HOME}
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/config.json
 #wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
 #for mainnet topology (p2p enabled)
-wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/mixed/topology.json
+#wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/mixed/topology.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/byron-genesis.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/shelley-genesis.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-genesis.json
+
+cat > ${NODE_HOME}/topology.json << EOF
+{
+  "LocalRoots": {
+    "groups": [
+      {
+        "localRoots": {
+          "accessPoints": [],
+          "advertise": false
+        },
+        "valency": 1
+      }
+    ]
+  },
+  "PublicRoots": [
+    {
+      "publicRoots": {
+        "accessPoints": [
+          {
+            "address": "mixed-node.world.dev.cardano.org",
+            "port": 30003
+          }
+        ],
+        "advertise": false
+      }
+    }
+  ],
+  "useLedgerAfterSlot": 52000
+}
+EOF
 
 curl -s -X POST https://api.telegram.org/bot${DARLENE1_TOKEN}/sendMessage -d chat_id=${TELEGRAM_ID} -d text="Hello from ${HOSTNAME}"
 

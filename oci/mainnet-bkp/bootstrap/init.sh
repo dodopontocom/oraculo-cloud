@@ -21,7 +21,7 @@ mkdir ${NODE_HOME}
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/config.json
 #wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/topology.json
 #for mainnet topology (p2p enabled)
-wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/mixed/topology.json
+#wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/mixed/topology.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/byron-genesis.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/shelley-genesis.json
 wget -P ${NODE_HOME} -N https://book.world.dev.cardano.org/environments/${NODE_CONFIG}/alonzo-genesis.json
