@@ -292,7 +292,7 @@ sudo apt-get upgrade -y
 sudo apt-get autoremove
 sudo apt-get autoclean
 
-sudo apt-get install unattended-upgrades -y
+sudo apt-get install unattended-upgrades
 sudo dpkg-reconfigure -plow -f noninteractive unattended-upgrades
 
 message=$(uptime -p)

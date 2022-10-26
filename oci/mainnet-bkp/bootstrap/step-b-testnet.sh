@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-#step-b
+#step-b-testnet
 
-rm -vfr ${HOME}/nohup.out
-
-#Critical Key Security Reminder: The only stake pool keys and certs that are required to run a stake pool are those required by the block producer. Namely, the following three files.
+#Critical Key Security Reminder: The only stake pool keys and certs that are required to run a stake pool are
+#those required by the block producer. Namely, the following three files.
 ###
 ### On block producer node
 ###
@@ -19,9 +18,9 @@ KEYS="${NODE_HOME}/keys"
 COLD="${NODE_HOME}/cold"
 
 # building the payment and stake adresses
-if [[ "$(cardano-cli query tip --mainnet | jq -r '.syncProgress' | cut -d'.' -f1)" -eq "100" ]]; then
+if [[ "$(cardano-cli query tip --testnet-magic 1 | jq -r '.syncProgress' | cut -d'.' -f1)" -eq "100" ]]; then
   cardano-cli query protocol-parameters \
-    --mainnet \
+    --testnet-magic 1 \
     --out-file ${NODE_HOME}/params.json
 
   cardano-cli address key-gen \
@@ -35,17 +34,17 @@ if [[ "$(cardano-cli query tip --mainnet | jq -r '.syncProgress' | cut -d'.' -f1
   cardano-cli stake-address build \
     --stake-verification-key-file ${COLD}/stake.vkey \
     --out-file ${KEYS}/stake.addr \
-    --mainnet
+    --testnet-magic 1
 
   cardano-cli address build \
     --payment-verification-key-file ${COLD}/payment.vkey \
     --stake-verification-key-file ${COLD}/stake.vkey \
     --out-file ${KEYS}/paymentwithstake.addr \
-    --mainnet
+    --testnet-magic 1
 
   cardano-cli query utxo \
     --address $(cat ${KEYS}/paymentwithstake.addr) \
-    --mainnet
+    --testnet-magic 1
   else
     echo "blockchain not synced"
 fi
@@ -55,12 +54,12 @@ cardano-cli stake-address registration-certificate \
     --stake-verification-key-file ${COLD}/stake.vkey \
     --out-file ${COLD}/stake.cert
 
-currentSlot=$(cardano-cli query tip --mainnet | jq -r '.slot')
+currentSlot=$(cardano-cli query tip --testnet-magic 1 | jq -r '.slot')
 echo Current Slot: $currentSlot
 
 cardano-cli query utxo \
     --address $(cat ${KEYS}/paymentwithstake.addr) \
-    --mainnet > fullUtxo.out
+    --testnet-magic 1 > fullUtxo.out
 
 tail -n +3 fullUtxo.out | sort -k3 -nr > balance.out
 
@@ -100,7 +99,7 @@ fee=$(cardano-cli transaction calculate-min-fee \
     --tx-body-file ${KEYS}/tx.tmp \
     --tx-in-count ${txcnt} \
     --tx-out-count 1 \
-    --mainnet \
+    --testnet-magic 1 \
     --witness-count 2 \
     --byron-witness-count 0 \
     --protocol-params-file ${NODE_HOME}/params.json | awk '{ print $1 }')
@@ -121,12 +120,12 @@ cardano-cli transaction sign \
     --tx-body-file ${KEYS}/tx.raw \
     --signing-key-file ${COLD}/payment.skey \
     --signing-key-file ${COLD}/stake.skey \
-    --mainnet \
+    --testnet-magic 1 \
     --out-file ${KEYS}/tx.signed
 
 cardano-cli transaction submit \
     --tx-file ${KEYS}/tx.signed \
-    --mainnet
+    --testnet-magic 1
 
 # Block producer keys
 cardano-cli node key-gen-KES \
@@ -141,7 +140,7 @@ cardano-cli node key-gen \
 slotsPerKESPeriod=$(cat ${NODE_HOME}/shelley-genesis.json | jq -r '.slotsPerKESPeriod')
 echo slotsPerKESPeriod: ${slotsPerKESPeriod}
 
-slotNo=$(cardano-cli query tip --mainnet | jq -r '.slot')
+slotNo=$(cardano-cli query tip --testnet-magic 1 | jq -r '.slot')
 echo slotNo: ${slotNo}
 
 kesPeriod=$((${slotNo} / ${slotsPerKESPeriod}))
@@ -164,9 +163,10 @@ chmod 400 ${KEYS}/vrf.skey
 cp ${COLD}/node-op.cert ${KEYS}/node-op.cert
 cp ${KEYS}/vrf.skey ${COLD}/vrf.skey
 cp ${KEYS}/vrf.vkey ${COLD}/vrf.vkey
+
 sudo systemctl stop cardano-node
 
-#for i in $(ls ${NODE_HOME}/keys/kes.skey ${NODE_HOME}/keys/vrf.skey ${NODE_HOME}/keys/node.cert); do cp ${i} ${NODE_HOME}; done
+#for i in $(ls ${NODE_HOME}/keys/kes.skey ${NODE_HOME}/keys/vrf.skey ${NODE_HOME}/keys/node-op.cert); do cp ${i} ${NODE_HOME}; done
 # then copy rest to off line device
 
 cat > ${NODE_HOME}/_startNode.sh << EOF
@@ -209,15 +209,15 @@ cat > ${NODE_HOME}/_topology.json << EOF
       "publicRoots": {
         "accessPoints": [
           {
-            "address": "mixed-node.world.dev.cardano.org",
-            "port": 30003
+            "address": "preprod-node.world.dev.cardano.org",
+            "port": 30000
           }
         ],
         "advertise": false
       }
     }
   ],
-  "useLedgerAfterSlot": 52000
+  "useLedgerAfterSlot": 4642000
 }
 EOF
 
@@ -246,13 +246,13 @@ echo minPoolCost: ${minPoolCost}
 cardano-cli stake-pool registration-certificate \
     --cold-verification-key-file ${COLD}/node.vkey \
     --vrf-verification-key-file ${COLD}/vrf.vkey \
-    --pool-pledge 1000000000 \
+    --pool-pledge 900000000 \
     --pool-cost 340000000 \
-    --pool-margin 0.0099 \
+    --pool-margin 0.009 \
     --pool-reward-account-verification-key-file ${COLD}/stake.vkey \
     --pool-owner-stake-verification-key-file ${COLD}/stake.vkey \
-    --mainnet \
-    --pool-relay-ipv4 <DEFINE> \
+    --testnet-magic 1 \
+    --pool-relay-ipv4 193.123.121.74 \
     --pool-relay-port 6000 \
     --metadata-url https://bit.ly/3eDFAx6 \
     --metadata-hash $(cat ${NODE_HOME}/poolMetaDataHash.txt) \
@@ -267,12 +267,12 @@ cardano-cli stake-address delegation-certificate \
 
 cp ${COLD}/deleg.cert ${KEYS}/deleg.cert
 
-currentSlot=$(cardano-cli query tip --mainnet | jq -r '.slot')
+currentSlot=$(cardano-cli query tip --testnet-magic 1 | jq -r '.slot')
 echo Current Slot: $currentSlot
 
 cardano-cli query utxo \
     --address $(cat ${KEYS}/paymentwithstake.addr) \
-    --mainnet > fullUtxo.out
+    --testnet-magic 1 > fullUtxo.out
 
 tail -n +3 fullUtxo.out | sort -k3 -nr > balance.out
 
@@ -310,7 +310,7 @@ fee=$(cardano-cli transaction calculate-min-fee \
     --tx-body-file ${KEYS}/tx.tmp \
     --tx-in-count ${txcnt} \
     --tx-out-count 1 \
-    --mainnet \
+    --testnet-magic 1 \
     --witness-count 3 \
     --byron-witness-count 0 \
     --protocol-params-file ${NODE_HOME}/params.json | awk '{ print $1 }')
@@ -335,10 +335,10 @@ cardano-cli transaction sign \
     --signing-key-file ${COLD}/payment.skey \
     --signing-key-file ${COLD}/node.skey \
     --signing-key-file ${COLD}/stake.skey \
-    --mainnet \
+    --testnet-magic 1 \
     --out-file ${COLD}/tx.signed
 
 cp ${COLD}/tx.signed ${KEYS}/tx.signed
 cardano-cli transaction submit \
     --tx-file ${KEYS}/tx.signed \
-    --mainnet
+    --testnet-magic 1
