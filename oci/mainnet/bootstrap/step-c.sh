@@ -26,12 +26,12 @@ EOF
 
 chmod +x ${HOME}/sendRewardBalanceAlert.sh
 
-cat > ${HOME}/simpleTx.sh << EOF
+cat > _simpleTx.sh << EOF
 #!/usr/bin/env bash
 
 currentSlot=""
-magic="--mainnet"
-currentSlot=\$(cardano-cli query tip \${magic} | jq -r .block)
+magic="--testnet-magic 1"
+currentSlot=\$(ccli query tip \${magic} | jq -r .block)
 
 echo currentSlot: \$currentSlot
 
@@ -41,7 +41,7 @@ destinationAddress="\$(cat \${NODE_HOME}/keys/paymentwithstake.addr)"
 echo destinationAddress: \${destinationAddress}
 fromAddr="\$(cat \${NODE_HOME}/keys/payment.addr)"
 
-cardano-cli query utxo --address \${fromAddr} \${magic} > fullUtxo.out
+ccli query utxo --address \${fromAddr} \${magic} > fullUtxo.out
 tail -n +3 fullUtxo.out | sort -k3 -nr > balance.out
 cat balance.out
 
@@ -61,10 +61,10 @@ txcnt=\$(cat balance.out | wc -l)
 echo Total ADA balance: \${total_balance}
 echo Number of UTXOs: \${txcnt}
 
-currentSlot=\$(cardano-cli query tip --mainnet | jq -r '.slot')
+currentSlot=\$(ccli query tip \${magic} | jq -r '.slot')
 echo Current Slot: \$currentSlot
 
-cardano-cli transaction build-raw \
+ccli transaction build-raw \
     \${tx_in} \
     --tx-out \${fromAddr}+0 \
     --tx-out \${destinationAddress}+0 \
@@ -74,7 +74,7 @@ cardano-cli transaction build-raw \
 
 echo txcnt: \${txcnt}
 
-cardano-cli query protocol-parameters \${magic} --out-file params.json
+ccli query protocol-parameters \${magic} --out-file params.json
 fee=\$(cardano-cli transaction calculate-min-fee \
     --tx-body-file tx.tmp \
     --tx-in-count \${txcnt} \
@@ -88,11 +88,11 @@ echo fee: \$fee
 txOut=\$((\${total_balance}-\${fee}-\${amountToSend}))
 echo Change Output: \${txOut}
 
-currentSlot=\$(cardano-cli query tip --mainnet | jq -r '.slot')
+currentSlot=\$(ccli query tip \${magic} | jq -r '.slot')
 echo Current Slot: \$currentSlot
 
 echo tx_in: \$tx_in
-cardano-cli transaction build-raw \
+ccli transaction build-raw \
     \${tx_in} \
     --tx-out \${fromAddr}+\${txOut} \
     --tx-out \${destinationAddress}+\${amountToSend} \
@@ -100,13 +100,13 @@ cardano-cli transaction build-raw \
     --fee \${fee} \
     --out-file tx.raw
 
-cardano-cli transaction sign \
+ccli transaction sign \
     --tx-body-file tx.raw \
     --signing-key-file \${NODE_HOME}/keys/payment.skey \
     \${magic} \
     --out-file tx.signed
 
-cardano-cli transaction submit --tx-file tx.signed \${magic}
+ccli transaction submit --tx-file tx.signed \${magic}
 EOF
 
 sudo chmod +x ${HOME}/simpleTx.sh
