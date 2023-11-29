@@ -1,14 +1,17 @@
+variable "region" {}
 variable "tenancy_ocid" {}
 variable "user_ocid" {}
+variable "vcn_name" {}
 #variable "fingerprint" {}
 #variable "private_key_path" {}
-variable "region" {}
-variable "vcn_name" {}
-variable "ubuntu_a1_image_version" {
-    default = "20.04"
+variable "bucket_name" {
+    default = "tfstate-learn-terraform"
+}
+
+variable "ubuntu_image_version" {
+    default = "22.04"
 }
 variable "ssh_public_key" {}
-variable "COLD_PAY_ADDR" {}
 variable "DARLENE1_TOKEN" {}
 variable "TELEGRAM_ID" {}
 variable "bvsize" {}

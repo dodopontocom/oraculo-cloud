@@ -1,13 +1,13 @@
-resource "oci_core_instance" "ampere-a1-instance" {
-  count               = 2
+resource "oci_core_instance" "instance" {
+  count               = 1
   availability_domain = data.oci_identity_availability_domain.ad.name
   compartment_id      = var.tenancy_ocid
-  display_name        = "preprod-cardano-node-${count.index}"
-  shape               = "VM.Standard.A1.Flex"
+  display_name        = "node-${count.index}"
+  shape               = "VM.Standard.E2.1.Micro"
 
   shape_config {
-    ocpus         = 2
-    memory_in_gbs = 12
+    ocpus         = 1
+    memory_in_gbs = 1
   }
 
   create_vnic_details {
@@ -15,19 +15,18 @@ resource "oci_core_instance" "ampere-a1-instance" {
     display_name              = oci_core_vcn.my_vnc.display_name
     assign_public_ip          = true
     assign_private_dns_record = true
-    hostname_label            = "ampere-node-${count.index}"
+    hostname_label            = "node-${count.index}"
   }
 
   source_details {
     source_type = "image"
-    source_id   = data.oci_core_image.a1_image.image_id
+    source_id   = data.oci_core_image.image.image_id
     boot_volume_size_in_gbs = var.bvsize
   }
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
     ### command to get oci metadata (must be inside the instance)
     ### curl -H "Authorization: Bearer Oracle" -L http://169.254.169.254/opc/v2/instance/metadata
-    COLD_PAY_ADDR = var.COLD_PAY_ADDR
     DARLENE1_TOKEN = var.DARLENE1_TOKEN
     TELEGRAM_ID = var.TELEGRAM_ID
   }
@@ -44,18 +43,18 @@ locals {
 }
 
 resource "null_resource" "remote-exec" {
-  depends_on = [oci_core_instance.ampere-a1-instance]
+  depends_on = [oci_core_instance.instance]
   count = 2
 
   triggers = {
-    master_id = "${element(oci_core_instance.ampere-a1-instance.*.id, count.index)}"
+    master_id = "${element(oci_core_instance.instance.*.id, count.index)}"
   }
 
   provisioner "remote-exec" {
     connection {
       agent       = false
       timeout     = "24h"
-      host        = "${element(oci_core_instance.ampere-a1-instance.*.public_ip, count.index)}"
+      host        = "${element(oci_core_instance.instance.*.public_ip, count.index)}"
       user        = "ubuntu"
       private_key = local.pr_key
     }

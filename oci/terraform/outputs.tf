@@ -15,7 +15,7 @@ output "subnet_state" {
 }
 
 output "instance_pub_ip" {
-  value = oci_core_instance.ampere-a1-instance.*.public_ip
+  value = oci_core_instance.instance.*.public_ip
 }
 
 output "oci_identity_availability_domain" {
@@ -23,17 +23,17 @@ output "oci_identity_availability_domain" {
 }
 
 output "image_list_for_a1" {
-    value = data.oci_core_images.supported_a1_instances_shape_images.images[0]["display_name"]
+    value = data.oci_core_images.supported_instances_shape_images.images[0]["display_name"]
 }
 
 output "image_list_for_a1_id" {
-    value = data.oci_core_images.supported_a1_instances_shape_images.images[0]["operating_system_version"]
+    value = data.oci_core_images.supported_instances_shape_images.images[0]["operating_system_version"]
 }
 
-output "a1_image_id" {
+output "image_id" {
   value = values({
-    for opsv, details in data.oci_core_images.supported_a1_instances_shape_images.images:
-    opsv => details.id if details.operating_system_version == "20.04" })[0]
+    for opsv, details in data.oci_core_images.supported_instances_shape_images.images:
+    opsv => details.id if details.operating_system_version == "22.04" })[0]
 }
 
 output "namespace_bucket" {
